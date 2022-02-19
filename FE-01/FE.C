@@ -12,10 +12,8 @@
 #include <sys/nearptr.h>
 
 
-
 #include "font.h"
 #include "bicycle.h"
-
 
 
 #define VIDEO_INT           0x10  /* the BIOS video interrupt. */
@@ -37,6 +35,7 @@
 #define DELAY_MAX 10
 #define LINE_MAX 1024
 #define FRAME_MAX 256
+
 
 #define VKEY_BSP   8
 #define VKEY_ENT  13
@@ -110,7 +109,6 @@ int main(void) {
   }
 
   VGA+=__djgpp_conventional_base;
-  my_clock = (void *)my_clock + __djgpp_conventional_base;
 
 
 
@@ -155,10 +153,9 @@ int main(void) {
 
 
   for(i=0;i<256;i++) {
-    DrawChar(b,i%16*10+10*9+1,i/16*10+1,3,0,i);
-    DrawRect(i%16*10+10*9,i/16*10,10,10,1);
+    DrawChar(b,i%16*8+10*9,i/16*8+1,3,0,i);
   }
-  DrawRect(f%16*10+10*9,f/16*10,10,10,2);
+  DrawRect(f%16*8+10*9-1,f/16*8,10,10,2);
 
 
 
@@ -173,22 +170,39 @@ int main(void) {
       switch(key) {
         case VKEY_ESC: quit=true; break;
         case VKEY_CMA:
-          DrawRect(f%16*10+10*9,f/16*10,10,10,1);
+          DrawRect(f%16*8+10*9-1,f/16*8,10,10,0);
+
+          for(j=-1;j<=1;j++)
+            for(i=-1;i<=1;i++)
+              if( f%16+i>=0 && f%16+i<=15 &&
+                  f/16+j>=0 && f/16+j<=15) {
+                DrawChar(b,(f%16+i)*8+10*9,(f/16+j)*8+1,3,0,16*j+i+f);
+              }
+
           if(f>0) f--; else f=255;
           DrawGrid(b,0,0,w,h,sz,3,0,1,f);
           DrawRect(cx*sz,cy*sz,sz,sz,2);
-          DrawRect(f%16*10+10*9,f/16*10,10,10,2);
+          DrawRect(f%16*8+10*9-1,f/16*8,10,10,2);
           DrawText(font_pixels,2,SCREEN_HEIGHT-8-2,3,0,"%03d",f);
+
           break;
         case VKEY_DOT:
-          DrawRect(f%16*10+10*9,f/16*10,10,10,1);
+          DrawRect(f%16*8+10*9-1,f/16*8,10,10,0);
+
+          for(j=-1;j<=1;j++)
+            for(i=-1;i<=1;i++)
+              if( f%16+i>=0 && f%16+i<=15 &&
+                  f/16+j>=0 && f/16+j<=15) {
+                DrawChar(b,(f%16+i)*8+10*9,(f/16+j)*8+1,3,0,16*j+i+f);
+              }
+
           if(f<255) f++; else f=0;
           DrawGrid(b,0,0,w,h,sz,3,0,1,f);
           DrawRect(cx*sz,cy*sz,sz,sz,2);
-          DrawRect(f%16*10+10*9,f/16*10,10,10,2);
+          DrawRect(f%16*8+10*9-1,f/16*8,10,10,2);
           DrawText(font_pixels,2,SCREEN_HEIGHT-8-2,3,0,"%03d",f);
+
           break;
-        default: break;
         case VKEY_LF:
           DrawRect(cx*sz,cy*sz,sz,sz,1);
           if(cx>0) cx--; else cx=w-1;
@@ -223,12 +237,13 @@ int main(void) {
             FillRect(cx*sz,cy*sz,sz,sz,3);
           }
           DrawRect(cx*sz,cy*sz,sz,sz,2);
-          DrawChar(b,f%16*10+10*9+1,f/16*10+1,3,0,f);
+          DrawChar(b,f%16*8+10*9,f/16*8+1,3,0,f);
         break;
         case VKEY_S:
         case VKEY_s:
-                SaveFont("font",b,w,h,256);
+          SaveFont("font",b,w,h,256);
         break;
+        default: break;
       }
     }
 
@@ -483,6 +498,8 @@ char *strupr(char *s) {
   }
   return s;
 }
+
+
 
 char *strlwr(char *s) {
   char *p=s;
