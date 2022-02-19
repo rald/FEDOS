@@ -1,0 +1,9 @@
+fe.exe: fe.c font.h bicycle.h
+	rescan
+	gcc fe.c -o fe.exe -g -Wall -Wextra
+
+.PHONY: clean
+
+clean:
+	del fe.exe
+	
